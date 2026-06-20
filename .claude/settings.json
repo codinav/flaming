@@ -58,7 +58,8 @@
       "Bash(git ls-tree *)",
       "Bash(echo \"files pushed: $\\(git ls-tree -r origin/main --name-only)",
       "Bash(git commit -q -m ' *)",
-      "Bash(npm uninstall *)"
+      "Bash(npm uninstall *)",
+      "Bash(git fetch *)"
     ]
   }
 }
