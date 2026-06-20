@@ -1,0 +1,199 @@
+// Flaming Integrated Logistiks Ltd — Data model
+//
+// Runs on SQLite out of the box (zero infra). Kept Postgres-compatible:
+// no native enums, no Json columns (status fields are validated strings,
+// JSON is stored as text). To switch to production PostgreSQL:
+//   1. set provider = "postgresql"
+//   2. set DATABASE_URL to your Postgres connection string
+//   3. npx prisma migrate deploy
+// (Optionally promote the *Status string fields back to native enums.)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────── CRM ───────────────────────────────
+
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  company   String?
+  email     String   @unique
+  phone     String?
+  country   String?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  quotes    Quote[]
+  shipments Shipment[]
+}
+
+model Lead {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  company   String?
+  message   String?
+  source    String?
+  status    String   @default("New") // New | Contacted | Qualified | Closed
+  createdAt DateTime @default(now())
+}
+
+model Quote {
+  id                 String  @id @default(cuid())
+  reference          String  @unique
+  name               String
+  company            String?
+  email              String
+  phone              String?
+  originCountry      String?
+  destinationCountry String?
+  cargoType          String?
+  weight             String?
+  dimensions         String?
+  shippingMethod     String?
+  serviceSlug        String?
+  notes              String?
+  source             String?
+  assignedTo         String?
+  status             String  @default("New") // New | Reviewing | Approved | Rejected | Converted
+
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id])
+
+  shipment Shipment?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ─────────────────────────────── Operations ───────────────────────────────
+
+model Shipment {
+  id             String  @id @default(cuid())
+  trackingNumber String  @unique
+  status         String  @default("Booked") // see shipmentStatuses
+  mode           String? // Air | Ocean (FCL) | Ocean (LCL) | Road | Multimodal
+
+  origin          String?
+  destination     String?
+  currentLocation String?
+  cargoType       String?
+  weightKg        Float?
+  pieces          Int?
+  eta             DateTime?
+  bookedAt        DateTime  @default(now())
+  deliveredAt     DateTime?
+  createdBy       String?
+
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id])
+  quoteId    String?   @unique
+  quote      Quote?    @relation(fields: [quoteId], references: [id])
+
+  timeline  TimelineEvent[]
+  documents ShipmentDocument[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TimelineEvent {
+  id         String   @id @default(cuid())
+  shipmentId String
+  shipment   Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  status     String
+  location   String?
+  note       String?
+  occurredAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+}
+
+model ShipmentDocument {
+  id         String   @id @default(cuid())
+  shipmentId String
+  shipment   Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  label      String
+  url        String
+  mimeType   String?
+  sizeBytes  Int?
+  uploadedBy String?
+  createdAt  DateTime @default(now())
+}
+
+// ─────────────────────────────── Content (CMS) ───────────────────────────────
+
+model BlogCategory {
+  id        String     @id @default(cuid())
+  name      String
+  slug      String     @unique
+  createdAt DateTime   @default(now())
+  posts     BlogPost[]
+}
+
+model BlogPost {
+  id              String   @id @default(cuid())
+  title           String
+  slug            String   @unique
+  excerpt         String?
+  content         String
+  coverImageUrl   String?
+  status          String   @default("Draft") // Draft | Published | Archived
+  metaTitle       String?
+  metaDescription String?
+  authorName      String?
+  readingMinutes  Int?
+
+  categoryId String?
+  category   BlogCategory? @relation(fields: [categoryId], references: [id])
+
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// ─────────────────────────────── Careers ───────────────────────────────
+
+model JobPosting {
+  id           String           @id @default(cuid())
+  title        String
+  slug         String           @unique
+  department   String?
+  location     String?
+  type         String? // Full-time | Contract | Internship
+  description  String
+  isOpen       Boolean          @default(true)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  applications JobApplication[]
+}
+
+model JobApplication {
+  id          String     @id @default(cuid())
+  jobId       String
+  job         JobPosting @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  name        String
+  email       String
+  phone       String?
+  resumeUrl   String?
+  coverLetter String?
+  status      String     @default("New") // New | Screening | Interview | Offer | Hired | Rejected
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+// ─────────────────────────────── Platform ───────────────────────────────
+
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String // JSON stored as text (Postgres-portable)
+  updatedAt DateTime @updatedAt
+}

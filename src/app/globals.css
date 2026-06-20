@@ -1,0 +1,346 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────
+   Flaming Integrated Logistiks — Design Tokens (Tailwind v4)
+   Brand: Green · White · Black. Green is surgical (action/accent),
+   ink is structural, white/off-white is the canvas.
+   ───────────────────────────────────────────────────────────── */
+@theme {
+  /* Brand green scale */
+  --color-brand-50: #edfbef;
+  --color-brand-100: #d2f5d7;
+  --color-brand-200: #a6e9b0;
+  --color-brand-300: #71d782;
+  --color-brand-400: #43be58;
+  --color-brand-500: #26a33d;
+  --color-brand-600: #1c8431;
+  --color-brand-700: #1a692a;
+  --color-brand-800: #185325;
+  --color-brand-900: #123f1d;
+  --color-brand-950: #06230d;
+
+  /* Lime accent — used very sparingly for highlights/glows */
+  --color-accent: #84cc16;
+
+  /* Ink (near-black) */
+  --color-ink: #0a0e0c;
+  --color-ink-700: #1b211e;
+  --color-ink-500: #3a423e;
+
+  /* Surfaces */
+  --color-canvas: #ffffff;
+  --color-canvas-soft: #f6f8f6;
+  --color-canvas-sunken: #eef2ee;
+
+  /* Typography */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: var(--font-sora), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  /* Radii */
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+  --radius-3xl: 1.75rem;
+
+  /* Shadows — soft, premium, low-contrast */
+  --shadow-soft: 0 1px 2px rgb(10 14 12 / 0.04), 0 8px 24px -8px rgb(10 14 12 / 0.10);
+  --shadow-lift: 0 2px 4px rgb(10 14 12 / 0.05), 0 24px 48px -16px rgb(10 14 12 / 0.18);
+  --shadow-glow: 0 0 0 1px rgb(38 163 61 / 0.15), 0 20px 50px -12px rgb(38 163 61 / 0.35);
+
+  /* Easing / motion */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Layout */
+  --container-max: 80rem; /* 1280px */
+}
+
+/* ── Base ───────────────────────────────────────────────────── */
+@layer base {
+  * {
+    border-color: color-mix(in oklab, var(--color-ink) 10%, transparent);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv02", "cv03", "cv04", "ss01";
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    /* Prevent stray horizontal scroll without breaking sticky positioning. */
+    overflow-x: clip;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  h1, h2, h3, h4, h5 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--color-brand-500) 28%, transparent);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+/* ── Reusable components ────────────────────────────────────── */
+@layer components {
+  .container-px {
+    margin-inline: auto;
+    width: 100%;
+    max-width: var(--container-max);
+    padding-inline: 1.25rem;
+  }
+  @media (min-width: 768px) {
+    .container-px { padding-inline: 2rem; }
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    line-height: 1;
+    padding: 0.875rem 1.4rem;
+    transition: transform 0.2s var(--ease-out-expo), background-color 0.2s, box-shadow 0.2s, color 0.2s;
+    white-space: nowrap;
+  }
+  .btn:active { transform: translateY(1px); }
+
+  .btn-primary {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--color-brand-500);
+    color: white;
+    box-shadow: var(--shadow-glow);
+  }
+  .btn-primary:hover { background-color: var(--color-brand-600); }
+  /* moving sheen on hover */
+  .btn-primary::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 30%, rgb(255 255 255 / 0.28) 50%, transparent 70%);
+    transform: translateX(-120%);
+    transition: transform 0.7s var(--ease-out-expo);
+  }
+  .btn-primary:hover::after { transform: translateX(120%); }
+
+  .btn-ink {
+    background-color: var(--color-ink);
+    color: white;
+  }
+  .btn-ink:hover { background-color: var(--color-ink-700); }
+
+  .btn-outline {
+    background-color: transparent;
+    color: var(--color-ink);
+    box-shadow: inset 0 0 0 1.5px color-mix(in oklab, var(--color-ink) 18%, transparent);
+  }
+  .btn-outline:hover {
+    box-shadow: inset 0 0 0 1.5px var(--color-brand-500);
+    color: var(--color-brand-700);
+  }
+
+  .btn-ghost-light {
+    background-color: rgb(255 255 255 / 0.1);
+    color: white;
+    box-shadow: inset 0 0 0 1.5px rgb(255 255 255 / 0.25);
+    backdrop-filter: blur(8px);
+  }
+  .btn-ghost-light:hover { background-color: rgb(255 255 255 / 0.18); }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-brand-700);
+  }
+
+  .card {
+    background-color: var(--color-canvas);
+    border: 1px solid color-mix(in oklab, var(--color-ink) 8%, transparent);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-soft);
+  }
+
+  /* Rich-text rendering for blog posts / job descriptions */
+  .prose-fill {
+    color: var(--color-ink-700);
+    line-height: 1.75;
+  }
+  .prose-fill > * + * { margin-top: 1.15em; }
+  .prose-fill h2 {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--color-ink);
+    margin-top: 1.8em;
+  }
+  .prose-fill h3 {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-ink);
+    margin-top: 1.5em;
+  }
+  .prose-fill p { color: var(--color-ink-700); }
+  .prose-fill a { color: var(--color-brand-700); text-decoration: underline; text-underline-offset: 2px; }
+  .prose-fill ul { list-style: disc; padding-left: 1.25rem; }
+  .prose-fill ol { list-style: decimal; padding-left: 1.25rem; }
+  .prose-fill li { margin-top: 0.4em; }
+  .prose-fill strong { color: var(--color-ink); font-weight: 600; }
+  .prose-fill blockquote {
+    border-left: 3px solid var(--color-brand-400);
+    padding-left: 1rem;
+    color: var(--color-ink-500);
+    font-style: italic;
+  }
+
+  /* Frosted glass panel for use over imagery / dark sections */
+  .glass {
+    background-color: rgb(255 255 255 / 0.08);
+    border: 1px solid rgb(255 255 255 / 0.14);
+    backdrop-filter: blur(16px) saturate(120%);
+    -webkit-backdrop-filter: blur(16px) saturate(120%);
+  }
+  .glass-light {
+    background-color: rgb(255 255 255 / 0.92);
+    border: 1px solid rgb(255 255 255 / 0.7);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+  }
+}
+
+/* ── Utilities ──────────────────────────────────────────────── */
+@layer utilities {
+  .text-gradient-brand {
+    background: linear-gradient(100deg, var(--color-brand-400), var(--color-brand-700));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, color-mix(in oklab, var(--color-ink) 5%, transparent) 1px, transparent 1px),
+      linear-gradient(to bottom, color-mix(in oklab, var(--color-ink) 5%, transparent) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+
+  .bg-dots {
+    background-image: radial-gradient(color-mix(in oklab, var(--color-ink) 12%, transparent) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+
+  .mask-fade-b {
+    -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent);
+    mask-image: linear-gradient(to bottom, black 70%, transparent);
+  }
+
+  .marquee-track {
+    animation: marquee 36s linear infinite;
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  .animate-float-slow {
+    animation: float 9s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  /* Orbital motion for the hero globe satellites */
+  .animate-orbit { animation: spin-orbit 26s linear infinite; }
+  .animate-orbit-rev { animation: spin-orbit 34s linear infinite reverse; }
+  .animate-orbit-fast { animation: spin-orbit 18s linear infinite; }
+  @keyframes spin-orbit {
+    to { transform: rotate(360deg); }
+  }
+
+  .animate-ping-slow {
+    animation: ping-slow 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+  @keyframes ping-slow {
+    0% { transform: scale(0.9); opacity: 0.7; }
+    80%, 100% { transform: scale(2.2); opacity: 0; }
+  }
+
+  .dash-flow {
+    stroke-dasharray: 6 10;
+    animation: dash 2.5s linear infinite;
+  }
+  @keyframes dash {
+    to { stroke-dashoffset: -160; }
+  }
+
+  /* Film grain overlay — apply to a full-bleed absolutely positioned element */
+  .grain {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+  }
+
+  /* Soft brand "mesh" glow background for abstract sections */
+  .mesh {
+    background-image:
+      radial-gradient(40% 50% at 15% 20%, rgb(38 163 61 / 0.12), transparent 70%),
+      radial-gradient(35% 45% at 85% 15%, rgb(132 204 22 / 0.10), transparent 70%),
+      radial-gradient(45% 55% at 75% 90%, rgb(38 163 61 / 0.10), transparent 70%);
+  }
+
+  /* Slow ken-burns zoom for editorial imagery on hover (group) */
+  .img-zoom {
+    transition: transform 1.2s var(--ease-out-expo);
+  }
+  .group:hover .img-zoom {
+    transform: scale(1.06);
+  }
+
+  .text-shadow-hero {
+    text-shadow: 0 2px 30px rgb(0 0 0 / 0.35);
+  }
+
+  /* Hide scrollbar for mobile swipe carousels */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
