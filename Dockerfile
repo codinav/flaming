@@ -14,7 +14,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 # DATABASE_URL is only needed at runtime; a placeholder satisfies prisma generate.
-ENV DATABASE_URL="file:./prisma/dev.db"
+ENV DATABASE_URL="postgresql://user:password@localhost:5432/fill"
 RUN npx prisma generate && npm run build
 
 # ── runner ────────────────────────────────────────────────────

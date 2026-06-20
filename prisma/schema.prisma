@@ -1,19 +1,17 @@
 // Flaming Integrated Logistiks Ltd — Data model
 //
-// Runs on SQLite out of the box (zero infra). Kept Postgres-compatible:
-// no native enums, no Json columns (status fields are validated strings,
-// JSON is stored as text). To switch to production PostgreSQL:
-//   1. set provider = "postgresql"
-//   2. set DATABASE_URL to your Postgres connection string
-//   3. npx prisma migrate deploy
-// (Optionally promote the *Status string fields back to native enums.)
+// PostgreSQL. Status/mode fields are validated strings (not native enums) and
+// settings/meta are stored as text, so the schema stays simple and portable.
+// Migrations live in prisma/migrations and run via `prisma migrate deploy`
+// (wired into the Vercel build). Local dev: point DATABASE_URL at any Postgres
+// (e.g. a free Neon database), then `npm run db:push && npm run db:seed`.
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
