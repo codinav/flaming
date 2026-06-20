@@ -50,7 +50,14 @@
       "Bash(npx playwright *)",
       "Bash(node shot.mjs)",
       "Bash(node shot2.mjs)",
-      "Bash(node shot3.mjs)"
+      "Bash(node shot3.mjs)",
+      "Bash(echo \"effective credential.helper: $\\(git config credential.helper || echo none\\)\")",
+      "Bash(echo \"system credential.helper: $\\(git config --system credential.helper || echo none\\)\")",
+      "Bash(git remote *)",
+      "Bash(echo \"remote: $\\(git remote get-url origin\\)\")",
+      "Bash(git ls-tree *)",
+      "Bash(echo \"files pushed: $\\(git ls-tree -r origin/main --name-only)",
+      "Bash(git commit -q -m ' *)"
     ]
   }
 }

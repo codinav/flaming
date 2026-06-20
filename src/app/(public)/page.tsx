@@ -1,6 +1,5 @@
 import { Hero } from "@/components/home/Hero";
 import { ClientLogos } from "@/components/home/ClientLogos";
-import { StatsBar } from "@/components/home/StatsBar";
 import { ServicesOverview } from "@/components/home/ServicesOverview";
 import { ModesBand } from "@/components/home/ModesBand";
 import { ProcessSection } from "@/components/home/ProcessSection";
@@ -15,7 +14,6 @@ export default function HomePage() {
     <>
       <Hero />
       <ClientLogos />
-      <StatsBar />
       <ServicesOverview />
       <ModesBand />
       <ProcessSection />
