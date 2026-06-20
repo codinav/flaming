@@ -1,7 +1,7 @@
 import { ArrowRight, PackageSearch, Headset, ShieldCheck, Clock4, Globe2 } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
-import { Globe } from "@/components/ui/Globe";
+import { GlobeLazy } from "@/components/ui/GlobeLazy";
 import { Reveal } from "@/components/ui/Reveal";
 
 export function Hero() {
@@ -117,7 +117,7 @@ export function Hero() {
 
             {/* The globe (slightly inset so orbits frame it) */}
             <div className="absolute inset-[5%]">
-              <Globe className="h-full w-full" />
+              <GlobeLazy className="h-full w-full" />
             </div>
 
             {/* HUD corner ticks */}

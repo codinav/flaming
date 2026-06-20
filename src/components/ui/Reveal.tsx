@@ -1,13 +1,12 @@
 "use client";
 
-import { motion, type Variants } from "framer-motion";
+import { useEffect, useRef, useState, type ElementType } from "react";
 import { cn } from "@/lib/utils";
 
-const variants: Variants = {
-  hidden: { opacity: 0, y: 22 },
-  show: { opacity: 1, y: 0 },
-};
-
+/**
+ * Lightweight scroll-reveal using a native IntersectionObserver + CSS
+ * transition (no animation library). Reveals once when it enters the viewport.
+ */
 export function Reveal({
   children,
   delay = 0,
@@ -19,40 +18,49 @@ export function Reveal({
   className?: string;
   as?: "div" | "li" | "span";
 }) {
-  const MotionTag = motion[as] as typeof motion.div;
+  const ref = useRef<HTMLElement | null>(null);
+  const [shown, setShown] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setShown(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setShown(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "0px 0px -80px 0px", threshold: 0.05 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  const Tag = as as ElementType;
   return (
-    <MotionTag
-      className={cn(className)}
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, margin: "-80px" }}
-      variants={variants}
-      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay }}
+    <Tag
+      ref={ref as never}
+      className={cn("reveal", shown && "reveal-in", className)}
+      style={delay ? { transitionDelay: `${delay}s` } : undefined}
     >
       {children}
-    </MotionTag>
+    </Tag>
   );
 }
 
-/** Stagger container for grids/lists of Reveal children. */
+/** Container passthrough — children reveal individually as they scroll in. */
 export function RevealGroup({
   children,
   className,
-  stagger = 0.08,
 }: {
   children: React.ReactNode;
   className?: string;
   stagger?: number;
 }) {
-  return (
-    <motion.div
-      className={cn(className)}
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, margin: "-80px" }}
-      variants={{ show: { transition: { staggerChildren: stagger } } }}
-    >
-      {children}
-    </motion.div>
-  );
+  return <div className={className}>{children}</div>;
 }

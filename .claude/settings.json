@@ -57,7 +57,8 @@
       "Bash(echo \"remote: $\\(git remote get-url origin\\)\")",
       "Bash(git ls-tree *)",
       "Bash(echo \"files pushed: $\\(git ls-tree -r origin/main --name-only)",
-      "Bash(git commit -q -m ' *)"
+      "Bash(git commit -q -m ' *)",
+      "Bash(npm uninstall *)"
     ]
   }
 }
