@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Target, Eye, HeartHandshake, ShieldCheck, Gauge, Globe2 } from "lucide-react";
 import { PageIntro } from "@/components/layout/PageIntro";
 import { Section, SectionHeading } from "@/components/ui/Section";
-import { StatsBar } from "@/components/home/StatsBar";
 import { QuoteCTA } from "@/components/home/QuoteCTA";
 import { Reveal } from "@/components/ui/Reveal";
 import { company } from "@/lib/site";
@@ -83,8 +82,6 @@ export default function AboutPage() {
           ))}
         </div>
       </Section>
-
-      <StatsBar />
 
       <QuoteCTA />
     </>
