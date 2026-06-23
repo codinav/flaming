@@ -17,7 +17,7 @@ and Prisma.
 | Styling   | Tailwind CSS v4 (CSS-first `@theme` tokens)                        |
 | Motion    | Framer Motion + `cobe` WebGL globe                                 |
 | Backend   | Next.js Route Handlers + Server Actions (full-stack monolith)      |
-| Database  | PostgreSQL via Prisma ORM (migrations auto-run on deploy)          |
+| Database  | Prisma ORM — SQLite (committed seed), portable to Postgres         |
 | Admin     | `/admin` protected by HTTP Basic Auth (env-gated middleware)       |
 | Email     | Resend (optional — logs when unconfigured)                         |
 | Deploy    | Vercel · Docker (standalone output) · AWS compatible              |
@@ -27,17 +27,16 @@ and Prisma.
 ## Getting started
 
 ```bash
-cp .env.example .env          # set DATABASE_URL to a Postgres URL (a free Neon DB works)
+cp .env.example .env          # SQLite by default — no DB to provision
 npm install                   # runs prisma generate
-npm run db:push               # create tables (or: npx prisma migrate deploy)
-npm run db:seed               # load demo data (shipments, quotes, blog, jobs)
+npm run db:seed               # (optional) reset demo data; a seeded dev.db is committed
 npm run dev                   # http://localhost:3000
 ```
 
-> Needs PostgreSQL. The fastest dev setup is a free [Neon](https://neon.tech) database —
-> paste its connection string into `DATABASE_URL`.
+> Uses **SQLite** out of the box — a seeded `prisma/dev.db` is committed, so it works
+> immediately with zero database setup.
 
-Demo tracking number: **`FILL-2025-04471`**. Admin panel: **`/admin`**.
+Demo tracking number: **`FILL-2025-04471`**. Admin panel: **`/admin`** (login below).
 
 Production build:
 
@@ -93,44 +92,53 @@ GET  /api/health       Liveness + DB connectivity probe
 `prisma/schema.prisma` — models: `Customer`, `Lead`, `Quote`, `Shipment`, `TimelineEvent`,
 `ShipmentDocument`, `BlogPost`/`BlogCategory`, `JobPosting`/`JobApplication`, `Setting`.
 
-**PostgreSQL** (no native enums / JSON columns — simple, portable). Migrations live in
-`prisma/migrations` and apply with `prisma migrate deploy`. Scripts: `npm run db:push`,
-`npm run db:seed`, `npm run db:studio`.
+Uses **SQLite** with a committed, seeded `prisma/dev.db`, so the app works on first deploy
+with no database setup. Status/mode fields are validated strings and settings/meta are text,
+so the schema is portable — to move to managed Postgres for durable writes, set
+`provider = "postgresql"` in `prisma/schema.prisma` and a `DATABASE_URL`, then
+`npx prisma db push && npm run db:seed`. Scripts: `npm run db:push`, `npm run db:seed`,
+`npm run db:studio`.
 
 ---
 
 ## Deployment
 
-### Vercel + Postgres (recommended)
+### Hostinger (Node.js app)
 
-1. **Create a Postgres database** — Vercel Postgres, [Neon](https://neon.tech), or Supabase.
-   Copy its connection string.
-2. **Import the repo** into Vercel (New Project → pick `codinav/flaming`). Framework is
-   auto-detected as Next.js.
-3. **Set environment variables** in the Vercel project:
+1. Connect this GitHub repo in Hostinger's Node.js app setup. Build command
+   `npm run build`, start command `npm start` (Node 20+).
+2. **Set environment variables** (hPanel → your app → Environment):
    | Variable | Required | Notes |
    | --- | --- | --- |
-   | `DATABASE_URL` | ✅ | Postgres connection string (use the direct/unpooled URL) |
-   | `ADMIN_USER` / `ADMIN_PASSWORD` | ✅ | Protects `/admin` (HTTP Basic Auth) |
-   | `NEXT_PUBLIC_SITE_URL` | ✅ | e.g. `https://fill.ng` |
+   | `ADMIN_USER` | ✅ | Admin login username (e.g. `admin`) |
+   | `ADMIN_PASSWORD` | ✅ | Admin login password — **without these `/admin` is unprotected** |
+   | `NEXT_PUBLIC_SITE_URL` | recommended | e.g. `https://fill.ng` |
    | `RESEND_API_KEY`, `MAIL_*` | optional | Email notifications |
    | `CLOUDINARY_*` | optional | File uploads |
-   | `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | optional | Maps |
-4. **Deploy.** The build runs `vercel-build` → `prisma generate && prisma migrate deploy &&
-   next build`, so tables are created automatically on first deploy.
-5. **(Optional) seed demo data** once: `DATABASE_URL="<prod-url>" npx prisma db seed`.
+3. Deploy. The committed `prisma/dev.db` means tracking, blog, careers, and the admin
+   panel work immediately — no DB provisioning.
 
-### Docker (self-host / AWS)
+> Note: with SQLite, data written in production (new quotes/shipments) resets on each
+> redeploy back to the committed seed. For durable production data, switch to managed
+> Postgres (Neon) as described above.
+
+### Docker (self-host)
 
 Standalone output is enabled:
 
 ```bash
 docker build -t fill-platform .
-docker run -p 3000:3000 -e DATABASE_URL=... -e ADMIN_USER=... -e ADMIN_PASSWORD=... fill-platform
-# run migrations against your DB: npx prisma migrate deploy
+docker run -p 3000:3000 -e ADMIN_USER=admin -e ADMIN_PASSWORD=... fill-platform
 ```
 
 `/api/health` is a ready-made health-check endpoint for load balancers.
+
+---
+
+## Admin access
+
+`/admin` is gated by a session-cookie login page (`/admin/login`). Set `ADMIN_USER` and
+`ADMIN_PASSWORD` to enable it; if unset, the panel is open (local-dev convenience).
 
 ---
 

@@ -12,8 +12,10 @@ import {
   Briefcase,
   Settings,
   ExternalLink,
+  LogOut,
 } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
+import { logout } from "@/app/admin/login/actions";
 import { cn } from "@/lib/utils";
 
 const nav = [
@@ -61,7 +63,7 @@ export function AdminSidebar() {
             </Link>
           ))}
         </nav>
-        <div className="border-t border-ink/8 p-3">
+        <div className="space-y-1 border-t border-ink/8 p-3">
           <Link
             href="/"
             className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-ink-500 hover:bg-canvas-soft"
@@ -69,6 +71,15 @@ export function AdminSidebar() {
             <ExternalLink className="h-[18px] w-[18px]" strokeWidth={1.8} />
             View website
           </Link>
+          <form action={logout}>
+            <button
+              type="submit"
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-ink-500 transition hover:bg-red-50 hover:text-red-600"
+            >
+              <LogOut className="h-[18px] w-[18px]" strokeWidth={1.8} />
+              Sign out
+            </button>
+          </form>
         </div>
       </aside>
 
@@ -78,9 +89,16 @@ export function AdminSidebar() {
           <Link href="/admin">
             <Logo />
           </Link>
-          <Link href="/" className="text-sm font-medium text-ink-500">
-            View site
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/" className="text-sm font-medium text-ink-500">
+              View site
+            </Link>
+            <form action={logout}>
+              <button type="submit" className="flex items-center gap-1 text-sm font-medium text-ink-500" aria-label="Sign out">
+                <LogOut className="h-4 w-4" />
+              </button>
+            </form>
+          </div>
         </div>
         <nav className="flex gap-1 overflow-x-auto px-3 pb-3">
           {nav.map(({ label, href }) => (

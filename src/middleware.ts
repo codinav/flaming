@@ -1,31 +1,23 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { ADMIN_COOKIE, getSessionToken, isAuthConfigured } from "@/lib/auth";
 
-// Protect the admin panel with HTTP Basic Auth when credentials are configured.
-// Set ADMIN_USER and ADMIN_PASSWORD in production. If unset (e.g. local dev),
-// access is allowed so you can work without a login flow.
-export const config = { matcher: ["/admin/:path*"] };
+// Gate the admin panel behind a session cookie set by the /admin/login page.
+// If credentials aren't configured (local dev without env), access is allowed.
+export const config = { matcher: ["/admin", "/admin/:path*"] };
 
-export function middleware(req: NextRequest) {
-  const user = process.env.ADMIN_USER;
-  const pass = process.env.ADMIN_PASSWORD;
+export async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
 
-  if (!user || !pass) return NextResponse.next();
+  // The login page itself must stay public to avoid a redirect loop.
+  if (pathname === "/admin/login") return NextResponse.next();
+  if (!isAuthConfigured()) return NextResponse.next();
 
-  const header = req.headers.get("authorization");
-  if (header?.startsWith("Basic ")) {
-    try {
-      const decoded = atob(header.slice(6));
-      const sep = decoded.indexOf(":");
-      const u = decoded.slice(0, sep);
-      const p = decoded.slice(sep + 1);
-      if (u === user && p === pass) return NextResponse.next();
-    } catch {
-      // fall through to challenge
-    }
-  }
+  const cookie = req.cookies.get(ADMIN_COOKIE)?.value;
+  const expected = await getSessionToken();
+  if (cookie && cookie === expected) return NextResponse.next();
 
-  return new NextResponse("Authentication required.", {
-    status: 401,
-    headers: { "WWW-Authenticate": 'Basic realm="Flaming Admin", charset="UTF-8"' },
-  });
+  const url = req.nextUrl.clone();
+  url.pathname = "/admin/login";
+  url.searchParams.set("from", pathname);
+  return NextResponse.redirect(url);
 }
