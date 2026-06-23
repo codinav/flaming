@@ -20,7 +20,7 @@ export default async function AdminLoginPage({
       <div className="w-full max-w-sm">
         <div className="mb-6 flex justify-center">
           <Link href="/" aria-label="Back to website">
-            <Logo />
+            <Logo motto />
           </Link>
         </div>
 

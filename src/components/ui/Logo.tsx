@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 type LogoProps = {
   variant?: "full" | "mark";
   light?: boolean;
+  motto?: boolean;
   className?: string;
 };
 
@@ -11,7 +12,7 @@ type LogoProps = {
  * The mark is a stylized green "speed wing" (three forward-leaning slabs with a
  * downward tail) rendered as inline SVG; the wordmark uses the display font.
  */
-export function Logo({ variant = "full", light = false, className }: LogoProps) {
+export function Logo({ variant = "full", light = false, motto = true, className }: LogoProps) {
   return (
     <span className={cn("inline-flex items-center gap-2.5", className)}>
       <svg
@@ -53,6 +54,16 @@ export function Logo({ variant = "full", light = false, className }: LogoProps) 
           >
             Integrated Logistiks Ltd
           </span>
+          {motto && (
+            <span
+              className={cn(
+                "mt-1 text-[0.7rem] font-medium italic tracking-tight",
+                light ? "text-brand-300" : "text-brand-600"
+              )}
+            >
+              Logistics With Flair
+            </span>
+          )}
         </span>
       )}
     </span>

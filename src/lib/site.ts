@@ -61,7 +61,8 @@ export type ServiceIcon =
   | "warehouse"
   | "building"
   | "network"
-  | "door";
+  | "door"
+  | "courier";
 
 export const services: Service[] = [
   {
@@ -182,6 +183,14 @@ export const services: Service[] = [
     summary:
       "One accountable partner from the supplier's door to yours — freight, clearance, and final-mile in a single managed service.",
     icon: "door",
+  },
+  {
+    slug: "onboard-courier-obc",
+    title: "Onboard Courier (OBC)",
+    short: "Hand-carried, time-critical",
+    summary:
+      "When every hour counts, a dedicated courier hand-carries your shipment on the next available flight — personally escorted, door to door, anywhere in the world.",
+    icon: "courier",
   },
 ];
 

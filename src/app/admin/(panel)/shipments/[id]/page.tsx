@@ -6,7 +6,14 @@ import { AdminHeader, Panel } from "@/components/admin/ui";
 import { LabeledInput, LabeledSelect, LabeledTextarea } from "@/components/admin/form";
 import { UploadField } from "@/components/admin/UploadField";
 import { StatusBadge } from "@/components/admin/StatusBadge";
-import { updateShipment, addTimelineEvent, addShipmentDocument } from "@/app/admin/actions";
+import { DeleteButton } from "@/components/admin/DeleteButton";
+import {
+  updateShipment,
+  addTimelineEvent,
+  addShipmentDocument,
+  deleteShipment,
+  deleteShipmentDocument,
+} from "@/app/admin/actions";
 import { shipmentStatuses } from "@/lib/site";
 import { shippingModes } from "@/lib/enums";
 
@@ -47,7 +54,18 @@ export default async function ShipmentDetailPage({ params }: { params: Promise<{
       <AdminHeader
         title={shipment.trackingNumber}
         description={`${shipment.origin ?? "—"} → ${shipment.destination ?? "—"}`}
-        action={<StatusBadge status={shipment.status} />}
+        action={
+          <div className="flex items-center gap-3">
+            <StatusBadge status={shipment.status} />
+            <DeleteButton
+              action={deleteShipment}
+              id={shipment.id}
+              label="Delete shipment"
+              message={`Delete shipment ${shipment.trackingNumber}? This removes its timeline and documents too.`}
+              className="border border-red-200"
+            />
+          </div>
+        }
       />
 
       <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
@@ -152,14 +170,23 @@ export default async function ShipmentDetailPage({ params }: { params: Promise<{
             {shipment.documents.map((d) => (
               <li key={d.id} className="flex items-center justify-between py-3">
                 <span className="text-sm font-medium text-ink">{d.label}</span>
-                <a
-                  href={d.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm font-medium text-brand-700 hover:underline"
-                >
-                  Open
-                </a>
+                <div className="flex items-center gap-3">
+                  <a
+                    href={d.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm font-medium text-brand-700 hover:underline"
+                  >
+                    Open
+                  </a>
+                  <DeleteButton
+                    action={deleteShipmentDocument}
+                    id={d.id}
+                    label=""
+                    message={`Delete document "${d.label}"?`}
+                    extra={[{ name: "shipmentId", value: shipment.id }]}
+                  />
+                </div>
               </li>
             ))}
           </ul>

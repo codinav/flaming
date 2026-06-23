@@ -1,5 +1,7 @@
 import { db } from "@/lib/db";
 import { AdminHeader, Panel, Th, Td, EmptyState } from "@/components/admin/ui";
+import { DeleteButton } from "@/components/admin/DeleteButton";
+import { deleteCustomer } from "@/app/admin/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +29,7 @@ export default async function CustomersPage() {
                   <Th>Country</Th>
                   <Th>Shipments</Th>
                   <Th>Quotes</Th>
+                  <Th />
                 </tr>
               </thead>
               <tbody className="divide-y divide-ink/6">
@@ -41,6 +44,13 @@ export default async function CustomersPage() {
                     <Td className="text-ink-500">{c.country ?? "—"}</Td>
                     <Td className="text-ink-500">{c._count.shipments}</Td>
                     <Td className="text-ink-500">{c._count.quotes}</Td>
+                    <Td>
+                      <DeleteButton
+                        action={deleteCustomer}
+                        id={c.id}
+                        message={`Delete ${c.name}? Their shipments/quotes are kept but unlinked.`}
+                      />
+                    </Td>
                   </tr>
                 ))}
               </tbody>

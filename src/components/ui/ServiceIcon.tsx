@@ -13,6 +13,7 @@ import {
   Building2,
   Network,
   DoorOpen,
+  Luggage,
   type LucideIcon,
 } from "lucide-react";
 import type { ServiceIcon as ServiceIconName } from "@/lib/site";
@@ -32,6 +33,7 @@ const map: Record<ServiceIconName, LucideIcon> = {
   building: Building2,
   network: Network,
   door: DoorOpen,
+  courier: Luggage,
 };
 
 export function ServiceIcon({

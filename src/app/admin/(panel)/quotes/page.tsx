@@ -1,7 +1,8 @@
 import { db } from "@/lib/db";
 import { AdminHeader, Panel, Th, Td, EmptyState } from "@/components/admin/ui";
 import { ActionSelect } from "@/components/admin/ActionSelect";
-import { setQuoteStatus, convertQuote } from "@/app/admin/actions";
+import { DeleteButton } from "@/components/admin/DeleteButton";
+import { setQuoteStatus, convertQuote, deleteQuote } from "@/app/admin/actions";
 import { quoteStatuses } from "@/lib/enums";
 
 export const dynamic = "force-dynamic";
@@ -45,14 +46,17 @@ export default async function QuotesPage() {
                       <ActionSelect id={q.id} value={q.status} options={quoteStatuses} action={setQuoteStatus} />
                     </Td>
                     <Td>
-                      {q.status !== "Converted" && (
-                        <form action={convertQuote}>
-                          <input type="hidden" name="id" value={q.id} />
-                          <button type="submit" className="rounded-lg bg-brand-50 px-3 py-1.5 text-xs font-semibold text-brand-700 hover:bg-brand-100">
-                            Convert → shipment
-                          </button>
-                        </form>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {q.status !== "Converted" && (
+                          <form action={convertQuote}>
+                            <input type="hidden" name="id" value={q.id} />
+                            <button type="submit" className="rounded-lg bg-brand-50 px-3 py-1.5 text-xs font-semibold text-brand-700 hover:bg-brand-100">
+                              Convert → shipment
+                            </button>
+                          </form>
+                        )}
+                        <DeleteButton action={deleteQuote} id={q.id} message={`Delete quote ${q.reference}?`} />
+                      </div>
                     </Td>
                   </tr>
                 ))}

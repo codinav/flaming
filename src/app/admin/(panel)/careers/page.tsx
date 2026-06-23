@@ -4,7 +4,8 @@ import { db } from "@/lib/db";
 import { AdminHeader, Panel, Th, Td, EmptyState, AdminLinkButton } from "@/components/admin/ui";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { ActionSelect } from "@/components/admin/ActionSelect";
-import { setApplicationStatus } from "@/app/admin/actions";
+import { DeleteButton } from "@/components/admin/DeleteButton";
+import { setApplicationStatus, deleteJob, deleteApplication } from "@/app/admin/actions";
 import { applicationStatuses } from "@/lib/enums";
 
 export const dynamic = "force-dynamic";
@@ -43,6 +44,7 @@ export default async function AdminCareersPage() {
                     <Th>Location</Th>
                     <Th>Open</Th>
                     <Th>Applications</Th>
+                    <Th />
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-ink/6">
@@ -59,6 +61,13 @@ export default async function AdminCareersPage() {
                         <StatusBadge status={j.isOpen ? "Published" : "Archived"} />
                       </Td>
                       <Td className="text-ink-500">{j._count.applications}</Td>
+                      <Td>
+                        <DeleteButton
+                          action={deleteJob}
+                          id={j.id}
+                          message={`Delete "${j.title}" and its ${j._count.applications} application(s)?`}
+                        />
+                      </Td>
                     </tr>
                   ))}
                 </tbody>
@@ -82,6 +91,7 @@ export default async function AdminCareersPage() {
                     <Th>Role</Th>
                     <Th>Resume</Th>
                     <Th>Status</Th>
+                    <Th />
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-ink/6">
@@ -103,6 +113,9 @@ export default async function AdminCareersPage() {
                       </Td>
                       <Td>
                         <ActionSelect id={a.id} value={a.status} options={applicationStatuses} action={setApplicationStatus} />
+                      </Td>
+                      <Td>
+                        <DeleteButton action={deleteApplication} id={a.id} message={`Delete application from ${a.name}?`} />
                       </Td>
                     </tr>
                   ))}

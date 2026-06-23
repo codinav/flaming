@@ -40,7 +40,7 @@ export function Footer() {
       <Container className="grid grid-cols-2 gap-x-6 gap-y-10 py-12 sm:py-14 lg:grid-cols-12">
         {/* Brand + contact */}
         <div className="col-span-2 lg:col-span-4">
-          <Logo light />
+          <Logo light motto />
           <p className="mt-5 max-w-sm text-sm leading-relaxed text-white/60">
             {company.tagline} Flaming Integrated Logistiks delivers freight forwarding, customs
             clearance, and supply chain solutions across {`120+`} countries — anchored in Lagos,
@@ -105,6 +105,22 @@ export function Footer() {
               ))}
             </div>
           </div>
+        </Container>
+      </div>
+
+      <div className="border-t border-white/10">
+        <Container className="py-4">
+          <p className="text-center text-xs text-white/40">
+            Designed &amp; developed by{" "}
+            <a
+              href="https://github.com/codinav"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-white/60 transition hover:text-brand-300"
+            >
+              Abhinav Saxena
+            </a>
+          </p>
         </Container>
       </div>
     </footer>

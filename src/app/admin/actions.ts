@@ -234,3 +234,81 @@ export async function setApplicationStatus(id: string, status: string) {
   await db.jobApplication.update({ where: { id }, data: { status } });
   revalidatePath("/admin/careers");
 }
+
+/* ── Deletions ─────────────────────────────────────────────── */
+
+export async function deleteShipment(fd: FormData) {
+  const id = str(fd, "id");
+  if (!id) return;
+  await db.shipment.delete({ where: { id } }); // cascades timeline + documents
+  revalidatePath("/admin/shipments");
+  redirect("/admin/shipments");
+}
+
+export async function deleteShipmentDocument(fd: FormData) {
+  const id = str(fd, "id");
+  const shipmentId = str(fd, "shipmentId");
+  if (!id) return;
+  await db.shipmentDocument.delete({ where: { id } });
+  if (shipmentId) revalidatePath(`/admin/shipments/${shipmentId}`);
+}
+
+export async function deleteQuote(fd: FormData) {
+  const id = str(fd, "id");
+  if (!id) return;
+  await db.shipment.updateMany({ where: { quoteId: id }, data: { quoteId: null } });
+  await db.quote.delete({ where: { id } });
+  revalidatePath("/admin/quotes");
+}
+
+export async function deleteLead(fd: FormData) {
+  const id = str(fd, "id");
+  if (!id) return;
+  await db.lead.delete({ where: { id } });
+  revalidatePath("/admin/leads");
+}
+
+export async function deleteCustomer(fd: FormData) {
+  const id = str(fd, "id");
+  if (!id) return;
+  await db.shipment.updateMany({ where: { customerId: id }, data: { customerId: null } });
+  await db.quote.updateMany({ where: { customerId: id }, data: { customerId: null } });
+  await db.customer.delete({ where: { id } });
+  revalidatePath("/admin/customers");
+}
+
+export async function deleteJob(fd: FormData) {
+  const id = str(fd, "id");
+  if (!id) return;
+  await db.jobPosting.delete({ where: { id } }); // cascades applications
+  revalidatePath("/admin/careers");
+  revalidatePath("/careers");
+  redirect("/admin/careers");
+}
+
+export async function deleteApplication(fd: FormData) {
+  const id = str(fd, "id");
+  if (!id) return;
+  await db.jobApplication.delete({ where: { id } });
+  revalidatePath("/admin/careers");
+}
+
+/* ── Blog categories (Settings) ────────────────────────────── */
+
+export async function createCategory(fd: FormData) {
+  const name = str(fd, "name");
+  if (!name) return;
+  const slug = slugify(name);
+  await db.blogCategory.upsert({ where: { slug }, create: { name, slug }, update: { name } });
+  revalidatePath("/admin/settings");
+  revalidatePath("/blog");
+}
+
+export async function deleteCategory(fd: FormData) {
+  const id = str(fd, "id");
+  if (!id) return;
+  await db.blogPost.updateMany({ where: { categoryId: id }, data: { categoryId: null } });
+  await db.blogCategory.delete({ where: { id } });
+  revalidatePath("/admin/settings");
+  revalidatePath("/blog");
+}

@@ -3,6 +3,8 @@ import { Plus } from "lucide-react";
 import { db } from "@/lib/db";
 import { AdminHeader, Panel, Th, Td, EmptyState, AdminLinkButton } from "@/components/admin/ui";
 import { StatusBadge } from "@/components/admin/StatusBadge";
+import { DeleteButton } from "@/components/admin/DeleteButton";
+import { deleteShipment } from "@/app/admin/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -43,6 +45,7 @@ export default async function ShipmentsPage() {
                   <Th>Status</Th>
                   <Th>ETA</Th>
                   <Th>Customer</Th>
+                  <Th />
                 </tr>
               </thead>
               <tbody className="divide-y divide-ink/6">
@@ -65,6 +68,13 @@ export default async function ShipmentsPage() {
                     </Td>
                     <Td className="text-ink-500">{fmt(s.eta)}</Td>
                     <Td className="text-ink-500">{s.customer?.company ?? s.customer?.name ?? "—"}</Td>
+                    <Td>
+                      <DeleteButton
+                        action={deleteShipment}
+                        id={s.id}
+                        message={`Delete shipment ${s.trackingNumber}? This removes its timeline and documents too.`}
+                      />
+                    </Td>
                   </tr>
                 ))}
               </tbody>

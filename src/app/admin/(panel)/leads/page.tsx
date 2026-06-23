@@ -1,7 +1,8 @@
 import { db } from "@/lib/db";
 import { AdminHeader, Panel, Th, Td, EmptyState } from "@/components/admin/ui";
 import { ActionSelect } from "@/components/admin/ActionSelect";
-import { setLeadStatus } from "@/app/admin/actions";
+import { DeleteButton } from "@/components/admin/DeleteButton";
+import { setLeadStatus, deleteLead } from "@/app/admin/actions";
 import { leadStatuses } from "@/lib/enums";
 
 export const dynamic = "force-dynamic";
@@ -26,6 +27,7 @@ export default async function LeadsPage() {
                   <Th>Message</Th>
                   <Th>Source</Th>
                   <Th>Status</Th>
+                  <Th />
                 </tr>
               </thead>
               <tbody className="divide-y divide-ink/6">
@@ -40,6 +42,9 @@ export default async function LeadsPage() {
                     <Td className="text-ink-500">{l.source ?? "—"}</Td>
                     <Td>
                       <ActionSelect id={l.id} value={l.status} options={leadStatuses} action={setLeadStatus} />
+                    </Td>
+                    <Td>
+                      <DeleteButton action={deleteLead} id={l.id} message={`Delete lead from ${l.name}?`} />
                     </Td>
                   </tr>
                 ))}
