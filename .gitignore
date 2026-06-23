@@ -30,7 +30,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 
-# prisma — dev.db is intentionally committed (seeded snapshot for deploy)
+# prisma — dev.db is created + seeded at runtime by scripts/ensure-db.mjs
+/prisma/*.db
 /prisma/*.db-journal
 
 # vercel

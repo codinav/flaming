@@ -4,8 +4,6 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  // Self-contained server output for Docker / container deploys.
-  output: "standalone",
   // Pin the workspace root to this project (a stray lockfile exists in $HOME).
   turbopack: { root: path.resolve(process.cwd()) },
   images: {

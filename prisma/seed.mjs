@@ -1,21 +1,19 @@
 import { PrismaClient } from "@prisma/client";
 
-const db = new PrismaClient();
-
-function daysAgo(n: number): Date {
+const daysAgo = (n) => {
   const d = new Date();
   d.setDate(d.getDate() - n);
   return d;
-}
-function daysAhead(n: number): Date {
+};
+const daysAhead = (n) => {
   const d = new Date();
   d.setDate(d.getDate() + n);
   return d;
-}
+};
+const slugify = (s) =>
+  s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
-async function main() {
-  console.log("Seeding database…");
-
+export async function seed(db) {
   // Clean (idempotent re-seed)
   await db.timelineEvent.deleteMany();
   await db.shipmentDocument.deleteMany();
@@ -29,7 +27,6 @@ async function main() {
   await db.blogCategory.deleteMany();
   await db.setting.deleteMany();
 
-  // ── Customers ──────────────────────────────────────────────
   const acme = await db.customer.create({
     data: {
       name: "Adaeze Okafor",
@@ -49,7 +46,6 @@ async function main() {
     },
   });
 
-  // ── Quotes ─────────────────────────────────────────────────
   await db.quote.createMany({
     data: [
       {
@@ -106,7 +102,6 @@ async function main() {
     ],
   });
 
-  // ── Leads ──────────────────────────────────────────────────
   await db.lead.createMany({
     data: [
       {
@@ -128,8 +123,7 @@ async function main() {
     ],
   });
 
-  // ── Shipments ──────────────────────────────────────────────
-  const shipmentStatuses = [
+  const statuses = [
     "Booked",
     "Processing",
     "Customs Clearance",
@@ -138,7 +132,7 @@ async function main() {
     "Out For Delivery",
     "Delivered",
   ];
-  const locations: Record<string, string> = {
+  const locations = {
     Booked: "Shanghai, CN",
     Processing: "Shanghai, CN",
     "Customs Clearance": "Shanghai Port, CN",
@@ -147,9 +141,9 @@ async function main() {
     "Out For Delivery": "Ikeja, Lagos, NG",
     Delivered: "Omole Phase 1, Lagos, NG",
   };
+  const idx = statuses.indexOf("In Transit");
 
-  const demoCurrentIndex = shipmentStatuses.indexOf("In Transit");
-  const demo = await db.shipment.create({
+  await db.shipment.create({
     data: {
       trackingNumber: "FILL-2025-04471",
       status: "In Transit",
@@ -164,7 +158,7 @@ async function main() {
       bookedAt: daysAgo(9),
       customerId: acme.id,
       timeline: {
-        create: shipmentStatuses.slice(0, demoCurrentIndex + 1).map((status, i) => ({
+        create: statuses.slice(0, idx + 1).map((status, i) => ({
           status,
           location: locations[status],
           occurredAt: daysAgo(9 - i * 2),
@@ -195,7 +189,7 @@ async function main() {
       deliveredAt: daysAgo(2),
       customerId: meridian.id,
       timeline: {
-        create: shipmentStatuses.map((status, i) => ({
+        create: statuses.map((status, i) => ({
           status,
           location: status === "Delivered" ? "Lagos, NG" : `Leg ${i + 1}`,
           occurredAt: daysAgo(8 - i),
@@ -218,7 +212,7 @@ async function main() {
       eta: daysAhead(3),
       bookedAt: daysAgo(14),
       timeline: {
-        create: shipmentStatuses.slice(0, 3).map((status, i) => ({
+        create: statuses.slice(0, 3).map((status, i) => ({
           status,
           location: locations[status] ?? "In progress",
           occurredAt: daysAgo(14 - i * 3),
@@ -227,9 +221,6 @@ async function main() {
     },
   });
 
-  console.log(`  shipments: 3 (demo ${demo.trackingNumber})`);
-
-  // ── Blog ───────────────────────────────────────────────────
   const categoryNames = [
     "Freight Forwarding",
     "International Trade",
@@ -238,10 +229,9 @@ async function main() {
     "Import & Export",
     "Logistics Tips",
   ];
-  const categories: Record<string, string> = {};
+  const categories = {};
   for (const name of categoryNames) {
-    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-    const c = await db.blogCategory.create({ data: { name, slug } });
+    const c = await db.blogCategory.create({ data: { name, slug: slugify(name) } });
     categories[name] = c.id;
   }
 
@@ -252,32 +242,28 @@ async function main() {
       excerpt:
         "A practical guide to documentation, duties, and the common mistakes that hold shipments at Apapa and Tin Can ports.",
       content:
-        "<p>Customs clearance is where many imports lose days — and money. The difference between a 2-day release and a 2-week hold usually comes down to preparation.</p><h2>Get your documentation right</h2><p>Ensure your Form M, PAAR, Bill of Lading, and commercial invoice are consistent. Mismatches in HS codes or values are the most common cause of delays.</p><h2>Classify cargo correctly</h2><p>Accurate HS classification determines your duty rate and required permits. When in doubt, work with a licensed customs broker.</p><h2>Plan for inspections</h2><p>Build inspection time into your schedule and keep your agent reachable. Proactive communication prevents small queries from becoming long holds.</p>",
+        "<p>Customs clearance is where many imports lose days — and money.</p><h2>Get your documentation right</h2><p>Ensure your Form M, PAAR, Bill of Lading, and commercial invoice are consistent.</p><h2>Classify cargo correctly</h2><p>Accurate HS classification determines your duty rate and required permits.</p><h2>Plan for inspections</h2><p>Build inspection time into your schedule and keep your agent reachable.</p>",
     },
     {
       title: "Air vs. Ocean Freight: Choosing the Right Mode for Your Cargo",
       category: "Freight Forwarding",
-      excerpt:
-        "Speed, cost, and reliability trade-offs — and a simple framework for deciding how to ship.",
+      excerpt: "Speed, cost, and reliability trade-offs — and a simple framework for deciding how to ship.",
       content:
-        "<p>Choosing between air and ocean freight isn't just about speed. It's about total landed cost, cargo value, and how time-sensitive your supply chain is.</p><h2>When air freight wins</h2><p>High-value, low-weight, or time-critical cargo. The higher freight cost is offset by lower inventory holding and faster cash cycles.</p><h2>When ocean freight wins</h2><p>Bulky, heavy, or non-urgent cargo. FCL for full loads, LCL when you can't fill a container.</p><h2>The hybrid play</h2><p>Many shippers split shipments — air for the urgent portion, ocean for the rest — to balance speed and cost.</p>",
+        "<p>Choosing between air and ocean freight isn't just about speed.</p><h2>When air freight wins</h2><p>High-value, low-weight, or time-critical cargo.</p><h2>When ocean freight wins</h2><p>Bulky, heavy, or non-urgent cargo. FCL for full loads, LCL when you can't fill a container.</p>",
     },
     {
       title: "5 Ways to Make Your Supply Chain More Resilient in 2026",
       category: "Supply Chain",
-      excerpt:
-        "From dual-sourcing to real-time visibility, here's how to absorb shocks without blowing your budget.",
+      excerpt: "From dual-sourcing to real-time visibility, here's how to absorb shocks without blowing your budget.",
       content:
-        "<p>Resilience is now a board-level priority. Here are five moves that pay off without over-engineering your network.</p><h2>1. Diversify suppliers and lanes</h2><p>Single points of failure are expensive. Qualify backup suppliers and alternate routings before you need them.</p><h2>2. Invest in visibility</h2><p>You can't manage what you can't see. Real-time tracking turns surprises into manageable events.</p><h2>3. Hold strategic buffers</h2><p>Targeted safety stock on critical SKUs beats blanket inventory.</p><h2>4. Build partner relationships</h2><p>In a crunch, trusted logistics partners get you capacity others can't.</p><h2>5. Review and rehearse</h2><p>Run scenario plans so your team knows the playbook.</p>",
+        "<p>Resilience is now a board-level priority.</p><h2>1. Diversify suppliers and lanes</h2><p>Single points of failure are expensive.</p><h2>2. Invest in visibility</h2><p>You can't manage what you can't see.</p><h2>3. Hold strategic buffers</h2><p>Targeted safety stock on critical SKUs beats blanket inventory.</p>",
     },
   ];
-
   for (const p of posts) {
-    const slug = p.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
     await db.blogPost.create({
       data: {
         title: p.title,
-        slug,
+        slug: slugify(p.title),
         excerpt: p.excerpt,
         content: p.content,
         status: "Published",
@@ -290,9 +276,7 @@ async function main() {
       },
     });
   }
-  console.log(`  blog: ${posts.length} posts, ${categoryNames.length} categories`);
 
-  // ── Careers ────────────────────────────────────────────────
   const jobs = [
     {
       title: "Freight Operations Coordinator",
@@ -300,7 +284,7 @@ async function main() {
       location: "Ikeja, Lagos",
       type: "Full-time",
       description:
-        "<p>Coordinate end-to-end shipments across air, ocean, and road — bookings, documentation, and milestone updates. You'll be the operational owner keeping cargo moving and clients informed.</p><h3>What you'll do</h3><ul><li>Manage shipment bookings and carrier coordination</li><li>Prepare and verify shipping documentation</li><li>Keep clients updated with proactive status</li></ul><h3>What you bring</h3><ul><li>2+ years in freight forwarding or logistics ops</li><li>Strong attention to detail and communication</li></ul>",
+        "<p>Coordinate end-to-end shipments across air, ocean, and road — bookings, documentation, and milestone updates.</p><h3>What you'll do</h3><ul><li>Manage shipment bookings and carrier coordination</li><li>Prepare and verify shipping documentation</li><li>Keep clients updated with proactive status</li></ul>",
     },
     {
       title: "Customs Clearance Specialist",
@@ -308,7 +292,7 @@ async function main() {
       location: "Apapa, Lagos",
       type: "Full-time",
       description:
-        "<p>Own the clearance process — classification, duties, permits, and liaison with customs and terminals to release cargo quickly and compliantly.</p><h3>What you bring</h3><ul><li>Licensed customs broker experience preferred</li><li>Deep knowledge of Nigerian customs procedures</li></ul>",
+        "<p>Own the clearance process — classification, duties, permits, and liaison with customs and terminals.</p>",
     },
     {
       title: "Business Development Manager",
@@ -316,13 +300,11 @@ async function main() {
       location: "Lagos (Hybrid)",
       type: "Full-time",
       description:
-        "<p>Grow our corporate client base. Identify opportunities, build relationships, and close logistics contracts across manufacturing, FMCG, and energy.</p>",
+        "<p>Grow our corporate client base across manufacturing, FMCG, and energy.</p>",
     },
   ];
-
   for (const j of jobs) {
-    const slug = j.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-    await db.jobPosting.create({ data: { ...j, slug, isOpen: true } });
+    await db.jobPosting.create({ data: { ...j, slug: slugify(j.title), isOpen: true } });
   }
 
   const firstJob = await db.jobPosting.findFirst();
@@ -338,28 +320,23 @@ async function main() {
       },
     });
   }
-  console.log(`  careers: ${jobs.length} jobs`);
 
-  // ── Settings ───────────────────────────────────────────────
   await db.setting.create({
     data: {
       key: "company",
-      value: JSON.stringify({
-        phone: "+2347049974905",
-        email: "info@fill.ng",
-        hours: "9:00 AM – 6:00 PM",
-      }),
+      value: JSON.stringify({ phone: "+2347049974905", email: "info@fill.ng", hours: "9:00 AM – 6:00 PM" }),
     },
   });
-
-  console.log("Seed complete ✅");
 }
 
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await db.$disconnect();
-  });
+// Allow running directly: `node prisma/seed.mjs`
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const db = new PrismaClient();
+  seed(db)
+    .then(() => console.log("Seed complete ✅"))
+    .catch((e) => {
+      console.error(e);
+      process.exitCode = 1;
+    })
+    .finally(() => db.$disconnect());
+}
