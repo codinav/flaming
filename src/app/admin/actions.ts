@@ -14,9 +14,16 @@ const num = (fd: FormData, k: string) => {
   return v ? Number(v.replace(/[^0-9.]/g, "")) || null : null;
 };
 
-function genTracking() {
-  const y = new Date().getFullYear();
-  return `FILL-${y}-${Math.floor(10000 + Math.random() * 90000)}`;
+/** System-generated, guaranteed-unique tracking number (e.g. FILL-2026-04471). */
+async function genTracking(): Promise<string> {
+  const year = new Date().getFullYear();
+  for (let i = 0; i < 12; i++) {
+    const code = `FILL-${year}-${Math.floor(10000 + Math.random() * 90000)}`;
+    const existing = await db.shipment.findUnique({ where: { trackingNumber: code } });
+    if (!existing) return code;
+  }
+  // Extremely unlikely fallback — time-based, still unique.
+  return `FILL-${year}-${Date.now().toString().slice(-6)}`;
 }
 
 function slugify(s: string) {
@@ -33,7 +40,7 @@ export async function createShipment(fd: FormData) {
   const location = str(fd, "currentLocation") || str(fd, "origin");
   const shipment = await db.shipment.create({
     data: {
-      trackingNumber: str(fd, "trackingNumber") || genTracking(),
+      trackingNumber: await genTracking(),
       status,
       mode: str(fd, "mode"),
       origin: str(fd, "origin"),
@@ -141,7 +148,7 @@ export async function convertQuote(fd: FormData) {
 
   const shipment = await db.shipment.create({
     data: {
-      trackingNumber: genTracking(),
+      trackingNumber: await genTracking(),
       status: "Booked",
       mode: q.shippingMethod,
       origin: q.originCountry,

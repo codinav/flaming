@@ -14,12 +14,14 @@ export default function NewShipmentPage() {
       <Link href="/admin/shipments" className="inline-flex items-center gap-1.5 text-sm text-ink-500 hover:text-brand-700">
         <ArrowLeft className="h-4 w-4" /> Back to shipments
       </Link>
-      <AdminHeader title="New shipment" description="Tracking number is auto-generated if left blank." />
+      <AdminHeader title="New shipment" description="A unique tracking number is generated automatically." />
 
       <Panel className="p-6 md:p-8">
         <form action={createShipment} className="space-y-5">
+          <div className="rounded-xl border border-brand-200 bg-brand-50 px-4 py-3 text-sm text-brand-800">
+            The tracking number (e.g. <span className="font-semibold">FILL-{new Date().getFullYear()}-XXXXX</span>) is created automatically by the system on save.
+          </div>
           <div className="grid gap-5 sm:grid-cols-2">
-            <LabeledInput label="Tracking number" name="trackingNumber" placeholder="Auto (FILL-…)" />
             <LabeledSelect
               label="Status"
               name="status"
